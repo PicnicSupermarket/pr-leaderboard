@@ -1,0 +1,7 @@
+aiohttp
+faker
+web3
+aiohttp_cors
+schedule
+requests
+PyGithub
