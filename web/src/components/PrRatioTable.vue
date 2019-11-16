@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-layout v-bind="layout_direction">
       <v-flex xs3>
-        <template v-for="(description, index) in descriptions">
+        <template v-for="description in descriptions" :key="description.header">
           <v-card :key="description.header" class="white--text" style="margin-bottom: 10px">
             <v-container fluid grid-list-lg>
               <v-layout column>
@@ -58,7 +58,7 @@
                     <div class="headline">Shop</div>
                     <div>
                       <v-list>
-                        <template v-for="(item, index) in badges">
+                        <template v-for="item in badges" :key="item.icon">
                           <v-list-tile avatar :key="item.name" @click="">
                             <v-list-tile-avatar>
                               <span class="display-1">{{ item.icon }}</span>
@@ -234,27 +234,27 @@ export default {
   },
   methods: {
     getAccessToken: function() {
-      var token = document.cookie.split(';').filter(item => item.indexOf('X-Access-Token=') >= 0).map(cookie => cookie.substring('X-Access-Token='.length));
+      const token = document.cookie.split(';').filter(item => item.indexOf('X-Access-Token=') >= 0).map(cookie => cookie.substring('X-Access-Token='.length));
       return token[0];
     },
     getRatios: function() {
       this.loading = true;
-      var that = this;
-      var token = this.getAccessToken();
-      var headers = {}
+      const token = this.getAccessToken();
+      let headers = {};
       if (token) {
         headers = { 'X-Access-Token': token }
       }
       axios
         .get("https://localhost:9999/api/metrics", { headers: headers })
-        .then(function(response) {
-          that.loading = false;
-          that.items = response.data.map((item, index) => {
+        .then(response => {
+          this.loading = false;
+          this.items = response.data.map((item, index) => {
             item["rank"] = index + 1;
-            return item; });
+            return item;
+          });
         })
-        .catch(function(error) {
-          that.loading = false;
+        .catch(() => {
+          this.loading = false;
         });
     },
   },
@@ -267,7 +267,7 @@ export default {
   },
   computed: {
     layout_direction () {
-      const layout_direction = {}
+      const layout_direction = {};
 
       if (this.$vuetify.breakpoint.mdAndDown) {
         layout_direction.column = true;

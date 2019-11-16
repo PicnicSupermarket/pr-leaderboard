@@ -12,8 +12,8 @@
       <v-list>
         <v-list-tile
           value="true"
-          v-for="(item, i) in items"
-          :key="i"
+          v-for="item in items"
+          :key="item.icon"
         >
           <v-list-tile-action>
             <v-icon v-html="item.icon"></v-icon>
@@ -47,7 +47,10 @@
     <v-footer :fixed="fixed" app>
       <span>Picnic Technologies</span>
       <v-spacer></v-spacer>
-      <v-btn round color="primary" href="https://github.com/login/oauth/authorize?scope=user:email&client_id=github_client_id&redirect_uri=https://localhost:9999/api/authenticate" dark><v-icon left>fab fa-github</v-icon>Sign-in through Github</v-btn>
+      <v-btn round color="primary" :href="auth_url" dark>
+        <v-icon left>fab fa-github</v-icon>
+        Sign-in through Github
+      </v-btn>
     </v-footer>
   </v-app>
 </template>
@@ -61,7 +64,8 @@ export default {
       fixed: false,
       items: [],
       miniVariant: false,
-      title: 'Hall of Fame'
+      title: 'Hall of Fame',
+      auth_url: 'https://github.com/login/oauth/authorize?scope=user:email&client_id=github_client_id&redirect_uri=https://localhost:9999/api/authenticate'
     }
   },
   name: 'App'
