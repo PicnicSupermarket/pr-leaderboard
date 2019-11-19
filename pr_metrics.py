@@ -23,7 +23,7 @@ fake = Faker('en_GB')
 routes = web.RouteTableDef()
 
 config = configparser.ConfigParser()
-cfg = config.read('config.ini')
+cfg = config.read('./config.ini')
 
 github = config['Github']
 oauth = config['OAuth']
