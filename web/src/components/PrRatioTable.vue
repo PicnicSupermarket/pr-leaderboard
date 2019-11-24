@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-layout v-bind="layout_direction">
       <v-flex xs3>
-        <template v-for="description in descriptions" :key="description.header">
+        <template v-for="description in descriptions">
           <v-card :key="description.header" class="white--text" style="margin-bottom: 10px">
             <v-container fluid grid-list-lg>
               <v-layout column>
@@ -58,7 +58,7 @@
                     <div class="headline">Shop</div>
                     <div>
                       <v-list>
-                        <template v-for="item in badges" :key="item.icon">
+                        <template v-for="item in badges">
                           <v-list-tile avatar :key="item.name" @click="">
                             <v-list-tile-avatar>
                               <span class="display-1">{{ item.icon }}</span>
