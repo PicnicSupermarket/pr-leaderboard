@@ -1,8 +1,8 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
-import Vue from 'vue'
-import App from './App'
-import router from './router'
+import Vue from 'vue';
+import App from './App';
+import router from './router';
 import {
   Vuetify,
   VApp,
@@ -18,8 +18,7 @@ import {
   VToolbar,
   VTooltip,
   transitions
-} from 'vuetify'
-import '../node_modules/vuetify/src/stylus/app.styl'
+} from 'vuetify';
 
 Vue.use(Vuetify, {
   components: {
