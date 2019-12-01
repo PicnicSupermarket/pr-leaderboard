@@ -33,11 +33,10 @@ RUN set -eu pipefail \
   && python3 -m pip install -r requirements.txt
 
 # Install Javascript dependencies
-ADD web/package.json .
-RUN yarn install
+ADD web/dist/ ./
 
 # Add the rest of the source
-ADD web/ pr_metrics.py run.sh genesis.json master-wallet ./
+ADD pr_metrics.py run.sh genesis.json master-wallet ./
 
 VOLUME ["/pr-blockchain", "/data"]
 EXPOSE 9999 8081 30303 8545

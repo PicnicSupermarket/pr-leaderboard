@@ -7,10 +7,16 @@
 ### Deploy Service
 
 ```bash
-# Build
+# Install JS dependencies
+yarn --cwd web install
+
+# Build JS
+yarn --cwd web build
+
+# Build Docker image
 docker build . -t pr-game:latest
 
-# Run
+# Run Docker container
 docker run -d -p 8081:8081 -p 9999:9999 -p 8545:8545 pr-game:latest
 ```
 
