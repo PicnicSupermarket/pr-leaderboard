@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Router from 'vue-router';
-import PrRatioTable from '@/components/PrRatioTable';
+import PrRatioTable from '../components/PrRatioTable';
 
 Vue.use(Router);
 

@@ -3,8 +3,7 @@
 import Vue from 'vue';
 import App from './App';
 import router from './router';
-import {
-  Vuetify,
+import Vuetify, {
   VApp,
   VCard,
   VDataTable,
@@ -14,11 +13,11 @@ import {
   VList,
   VBtn,
   VIcon,
-  VGrid,
   VToolbar,
-  VTooltip,
-  transitions
-} from 'vuetify';
+  VTooltip
+} from 'vuetify/lib';
+import VGrid from 'vuetify/lib/components/VGrid';
+import transitions from 'vuetify/lib/components/transitions';
 
 Vue.use(Vuetify, {
   components: {
@@ -44,6 +43,6 @@ Vue.config.productionTip = false;
 new Vue({
   el: '#app',
   router,
-  components: { App },
+  components: {App},
   template: '<App/>'
 });
