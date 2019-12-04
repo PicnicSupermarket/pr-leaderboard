@@ -62,7 +62,7 @@ class Metrics(web.View):
             try:
                 address = accounts[name]
             except KeyError:
-                print("No account exists for {}".format(name))
+                print(f"No account exists for {name}")
             amount = 0.0
             if address:
                 w3 = Web3(IPCProvider(ipc_path=App.ipc))
@@ -76,9 +76,9 @@ class Metrics(web.View):
             table_history.append(
                 {
                     "name": final_name,
-                    "ratio": "{:0.2f}".format(historic.get(name)),
+                    "ratio": f"{historic.get(name):0.2f}",
                     "address": address or "n/a",
-                    "coin": "{:0.6f}".format(amount),
+                    "coin": f"{amount:0.6f}",
                     "is_owner": is_owner,
                 }
             )
@@ -87,7 +87,6 @@ class Metrics(web.View):
 
 
 class App:
-
     ROUTES = [
         web.get(r"/api/health", Health),
         web.get(r"/api/authenticate", Auth),
@@ -185,12 +184,10 @@ def get_ratio(username):
     ).totalCount
     if authored > 0:
         reviewed = App.github.search_issues(
-            "org:{} reviewed-by:{} is:closed".format(App.organisation, username)
+            f"org:{App.organisation} reviewed-by:{username} is:closed"
         ).totalCount
         authored_and_reviewed = App.github.search_issues(
-            "org:{} reviewed-by:{} author:{} is:closed".format(
-                App.organisation, username, username
-            )
+            f"org:{App.organisation} reviewed-by:{username} author:{username} is:closed"
         ).totalCount
         ratio = float((reviewed - authored_and_reviewed)) / authored
         return ratio
