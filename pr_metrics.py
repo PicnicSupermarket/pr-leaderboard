@@ -39,6 +39,7 @@ class Health(web.View):
 class Metrics(web.View):
     async def get(self):
         token = self.request.headers.get("X-Access-Token")
+        w3 = Web3(IPCProvider(ipc_path=App.ipc))
         github_name = ""
         if token:
             try:
@@ -47,27 +48,20 @@ class Metrics(web.View):
                 github_name = user.name or user.login
             except BadCredentialsException:
                 return web.Response(status=401, text="401 Bad GitHub credentials")
-        try:
-            with open(App.historical_data, "rb") as f:
-                historic = pickle.load(f)
-            with open(App.accounts_data, "rb") as f:
-                accounts = pickle.load(f)
-        except FileNotFoundError:
-            return web.Response(status=404)
 
         table_history = []
-        for name in sorted(historic, key=historic.get, reverse=True):
+        for name in sorted(App.scores, key=App.scores.get, reverse=True):
             is_owner = False
             final_name = name
             try:
-                address = accounts[name]
+                address = App.accounts[name]
             except KeyError:
                 print(f"No account exists for {name}")
+                address = None
             amount = 0.0
             if address:
-                w3 = Web3(IPCProvider(ipc_path=App.ipc))
                 amount = w3.fromWei(w3.eth.getBalance(address), "ether")
-            if (historic.get(name) < 1.0) and github_name != name:
+            if (App.scores.get(name) < 1.0) and github_name != name:
                 final_name = App.fake.name()
             elif github_name == name:
                 final_name = name
@@ -76,7 +70,7 @@ class Metrics(web.View):
             table_history.append(
                 {
                     "name": final_name,
-                    "ratio": f"{historic.get(name):0.2f}",
+                    "ratio": f"{App.scores.get(name):0.2f}",
                     "address": address or "n/a",
                     "coin": f"{amount:0.6f}",
                     "is_owner": is_owner,
@@ -84,6 +78,24 @@ class Metrics(web.View):
             )
 
         return web.json_response(table_history)
+
+
+def load_data(file):
+    try:
+        with open(file, "rb") as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return {}
+
+
+def update_accounts():
+    with open(App.accounts_data_path, "wb+") as f:
+        pickle.dump(App.accounts, f)
+
+
+def update_scores():
+    with open(App.score_data_path, "wb+") as f:
+        pickle.dump(App.scores, f)
 
 
 class App:
@@ -95,12 +107,18 @@ class App:
 
     default_wallet_password = "password"
 
-    accounts_data = "data/accounts.data"
-    historical_data = "data/historical.data"
+    accounts_data_path = "data/accounts.data"
+    score_data_path = "data/scores.data"
 
+    accounts = load_data(accounts_data_path)
+    scores = load_data(score_data_path)
+
+    # Connection to Geth
     ipc = "/root/geth.ipc"
+
     fake = Faker("en_GB")
 
+    # Configuration parsing
     config = configparser.ConfigParser()
     cfg = config.read("./config.ini")
 
@@ -118,6 +136,7 @@ class App:
     github_client_secret = oauth["Secret"]
     github_client_id = oauth["ClientId"]
 
+    # Github API
     github = Github(token)
     org = github.get_organization(organisation)
 
@@ -126,7 +145,7 @@ class App:
 
     def get_app(self) -> web.Application:
         app = web.Application()
-        app.add_routes(App.ROUTES)
+        app.add_routes(self.ROUTES)
 
         # Configure default CORS settings.
         cors = aiohttp_cors.setup(
@@ -151,34 +170,21 @@ def main():
     web.run_app(app, port=9999)
 
 
-def exhaust_pages(paginated):
-    pages = []
-    i = 0
+def calculate_scores():
     while True:
-        page = paginated.get_page(i)
-        i += 1
-        pages.extend(page)
-        if len(page) < 30:  # Last page
-            break
-    return pages
-
-
-def historical():
-    while True:
-        members = exhaust_pages(App.org.get_members())
-        ratios = {}
-        print(f"Pulling stats for {len(members)} developers")
+        members = App.org.get_members()
+        print(f"Pulling stats for {members.totalCount} developers")
         for member in members:
             username = str(member.login)
-            ratio = get_ratio(username)
-            name = member.name if member.name is not None else username
-            ratios[name] = ratio
-        with open(App.historical_data, "wb+") as f:
-            pickle.dump(ratios, f)
+            score = get_score(username)
+            if score > 0:
+                name = member.name if member.name is not None else username
+                App.scores[name] = score
+                update_scores()
 
 
 @retry(RateLimitExceededException, delay=10)
-def get_ratio(username):
+def get_score(username):
     authored = App.github.search_issues(
         f"org:{App.organisation} author:{username} is:closed"
     ).totalCount
@@ -189,33 +195,22 @@ def get_ratio(username):
         authored_and_reviewed = App.github.search_issues(
             f"org:{App.organisation} reviewed-by:{username} author:{username} is:closed"
         ).totalCount
-        ratio = float((reviewed - authored_and_reviewed)) / authored
-        return ratio
+        review_ratio = float((reviewed - authored_and_reviewed)) / authored
+        return review_ratio
+    return 0
 
 
 def pay_out():
-    print("Paying out")
-    try:
-        with open(App.historical_data, "rb") as f:
-            historic = pickle.load(f)
-    except FileNotFoundError:
-        return
-    try:
-        with open(App.accounts_data, "rb") as f:
-            accounts = pickle.load(f)
-    except FileNotFoundError:
-        print("Accounts not found")
-        accounts = {}
-
+    print("Paying out...")
     w3 = Web3(IPCProvider(ipc_path=App.ipc))
 
-    for user in historic:
-        address = accounts.get(user)
+    for user in App.scores:
+        address = App.accounts.get(user)
         if address is None:
             address = w3.geth.personal.newAccount(App.default_wallet_password)
-            accounts[user] = address
+            App.accounts[user] = address
 
-        ratio = historic.get(user)
+        ratio = App.scores.get(user)
         if ratio >= 1.0:
             amount = w3.toHex(int(math.pow(ratio, 15)))
             w3.geth.personal.unlockAccount(main, App.password)
@@ -223,8 +218,7 @@ def pay_out():
                 transaction={"from": main, "to": address, "value": amount}
             )
 
-    with open(App.accounts_data, "wb") as f:
-        pickle.dump(accounts, f)
+    update_accounts()
 
 
 def pay():
@@ -238,7 +232,7 @@ def run():
     pay_thread = threading.Thread(target=pay)
     pay_thread.start()
 
-    thread2 = threading.Thread(target=historical)
+    thread2 = threading.Thread(target=calculate_scores)
     thread2.setDaemon(True)
     thread2.start()
     thread2.join()
