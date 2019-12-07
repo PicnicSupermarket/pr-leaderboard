@@ -2,9 +2,9 @@
   <v-app dark>
     <v-navigation-drawer
       v-model="drawer"
-      persistent
-      :mini-variant="miniVariant"
       :clipped="clipped"
+      :mini-variant="miniVariant"
+      persistent
       enable-resize-watcher
       fixed
       app
@@ -25,8 +25,8 @@
       </v-list>
     </v-navigation-drawer>
     <v-toolbar
-      app
       :clipped-left="clipped"
+      app
     >
       <v-toolbar-side-icon @click.stop="drawer = !drawer" />
       <v-btn
@@ -60,9 +60,9 @@
       <span>Picnic Technologies</span>
       <v-spacer />
       <v-btn
+        :href="auth_url"
         round
         color="primary"
-        :href="auth_url"
         dark
       >
         <v-icon left>
