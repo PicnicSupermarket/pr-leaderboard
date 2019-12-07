@@ -18,6 +18,7 @@ import Vuetify, {
 } from 'vuetify/lib';
 import VGrid from 'vuetify/lib/components/VGrid';
 import transitions from 'vuetify/lib/components/transitions';
+import "vuetify/dist/vuetify.min.css";
 
 Vue.use(Vuetify, {
   components: {
