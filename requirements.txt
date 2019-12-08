@@ -1,8 +1,8 @@
 aiohttp
-faker
-web3
 aiohttp_cors
-schedule
-requests
+asyncio
+faker
 PyGithub
+requests
 retry
+web3

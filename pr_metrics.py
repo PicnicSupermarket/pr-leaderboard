@@ -4,11 +4,12 @@ from web3 import Web3, IPCProvider
 from aiohttp import web
 from retry import retry
 
-import threading
+import concurrent.futures
+import asyncio
+import time
 import pickle
 import aiohttp_cors
 import requests
-import schedule
 import math
 import configparser
 
@@ -165,15 +166,42 @@ class App:
 
 def main():
     app = App(configparser.ConfigParser()).get_app()
-    runThread = threading.Thread(target=run)
-    runThread.start()
+    app.on_startup.append(schedule)
     web.run_app(app, port=9999)
+
+
+async def schedule(app):
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+    loop = asyncio.get_running_loop()
+    loop.run_in_executor(executor, calculate_scores)
+    loop.run_in_executor(executor, pay_out)
+
+
+def pay_out():
+    w3 = Web3(IPCProvider(ipc_path=App.ipc))
+    while True:
+        print("Paying out...")
+        for user in App.scores:
+            address = App.accounts.get(user)
+            if address is None:
+                address = w3.geth.personal.newAccount(App.default_wallet_password)
+                App.accounts[user] = address
+
+            ratio = App.scores.get(user)
+            if ratio >= 1.0:
+                amount = w3.toHex(int(math.pow(ratio, 15)))
+                w3.geth.personal.unlockAccount(main, App.password)
+                w3.eth.sendTransaction(
+                    transaction={"from": main, "to": address, "value": amount}
+                )
+        update_accounts()
+        time.sleep(600)
 
 
 def calculate_scores():
     while True:
         members = App.org.get_members()
-        print(f"Pulling stats for {members.totalCount} developers")
+        print(f"Pulling stats for {members.totalCount} developers...")
         for member in members:
             username = str(member.login)
             score = get_score(username)
@@ -198,44 +226,6 @@ def get_score(username):
         review_ratio = float((reviewed - authored_and_reviewed)) / authored
         return review_ratio
     return 0
-
-
-def pay_out():
-    print("Paying out...")
-    w3 = Web3(IPCProvider(ipc_path=App.ipc))
-
-    for user in App.scores:
-        address = App.accounts.get(user)
-        if address is None:
-            address = w3.geth.personal.newAccount(App.default_wallet_password)
-            App.accounts[user] = address
-
-        ratio = App.scores.get(user)
-        if ratio >= 1.0:
-            amount = w3.toHex(int(math.pow(ratio, 15)))
-            w3.geth.personal.unlockAccount(main, App.password)
-            w3.eth.sendTransaction(
-                transaction={"from": main, "to": address, "value": amount}
-            )
-
-    update_accounts()
-
-
-def pay():
-    pay_out()
-    schedule.every(10).minutes.do(pay_out)
-    while True:
-        schedule.run_pending()
-
-
-def run():
-    pay_thread = threading.Thread(target=pay)
-    pay_thread.start()
-
-    thread2 = threading.Thread(target=calculate_scores)
-    thread2.setDaemon(True)
-    thread2.start()
-    thread2.join()
 
 
 if __name__ == "__main__":
