@@ -27,10 +27,10 @@ RUN set -eu pipefail \
     yarn
 
 # Install Python dependencies
-ADD requirements.txt config.ini ./
+ADD Pipfile.lock Pipfile config.ini ./
 RUN set -eu pipefail \
   && python3 -m pip install --upgrade pip \
-  && python3 -m pip install -r requirements.txt
+  && pip install pipenv
 
 # Install Javascript dependencies
 ADD web/dist/ ./

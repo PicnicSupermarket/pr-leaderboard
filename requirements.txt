@@ -1,8 +1,0 @@
-aiohttp
-aiohttp_cors
-asyncio
-faker
-PyGithub
-requests
-retry
-web3
