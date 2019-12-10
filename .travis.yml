@@ -5,10 +5,10 @@ before_install:
   - sudo apt-get install python3-pip python3-setuptools
 install:
   - pip3 install --upgrade pip
-  - pip3 install --user --upgrade black flake8 isort
+  - pip3 install --user "black==19.10b0" "flake8==3.7.9" "isort==4.3.21"
+  - isort --check-only *
   - flake8 --max-line-length=88 ./
   - black --check ./
-  - isort --check-only *
   - yarn --cwd web install
   - yarn --cwd web build
 cache: pip
