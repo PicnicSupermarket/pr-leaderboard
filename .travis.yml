@@ -1,9 +1,16 @@
 language: generic
+dist: bionic
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install python3-pip python3-setuptools
 install:
   - pip3 install --upgrade pip
-  - pip3 install --upgrade pipenv
+  - pip3 install --user --upgrade black flake8 isort
 cache: pip
 script:
+  - flake8 --max-line-length=88 ./
+  - black --check ./
+  - isort --check-only *
   - yarn --cwd web install
   - yarn --cwd web build
   - docker build . -t pr-game:latest

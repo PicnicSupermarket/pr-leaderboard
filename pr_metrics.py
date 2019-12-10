@@ -1,17 +1,18 @@
-from github import Github, BadCredentialsException, RateLimitExceededException
-from faker import Faker
-from web3 import Web3, IPCProvider
-from aiohttp import web
-from retry import retry
-
-import concurrent.futures
 import asyncio
-import time
+import concurrent.futures
+import configparser
+import math
 import pickle
+import time
+
 import aiohttp_cors
 import requests
-import math
-import configparser
+from aiohttp import web
+from faker import Faker
+from github import BadCredentialsException, Github, RateLimitExceededException
+from web3 import IPCProvider, Web3
+
+from retry import retry
 
 
 class Auth(web.View):
@@ -220,7 +221,9 @@ def get_score(username):
             f"org:{App.organisation} reviewed-by:{username} is:closed"
         ).totalCount
         authored_and_reviewed = App.github.search_issues(
-            f"org:{App.organisation} reviewed-by:{username} author:{username} is:closed"
+            f"org:{App.organisation}"
+            f" reviewed-by:{username} "
+            f"author:{username} is:closed"
         ).totalCount
         review_ratio = float((reviewed - authored_and_reviewed)) / authored
         return review_ratio
