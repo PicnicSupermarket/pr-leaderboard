@@ -302,7 +302,7 @@
           headers = {'X-Access-Token': token};
         }
         axios
-          .get('https://localhost:9999/api/metrics', {headers: headers})
+          .get('http://localhost:9999/api/metrics', {headers: headers})
           .then(response => {
             this.loading = false;
             this.items = response.data.map((item, index) => {
