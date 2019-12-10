@@ -10,7 +10,7 @@ But for a large number of us, code reviewing isn't how we necessarily want to sp
 The PR Game adds an extra incentive to code reviewing in the form of a cryptocurrency where developers mine coins based 
 on their contributions to code reviews. 
 
-The default score is simply the ratio of between the number of PRs that a developer has reviewed versus the number of PRs 
+The default score is simply the ratio between the number of PRs that a developer has reviewed versus the number of PRs 
 that they have authored. This score can easily be adopted in the `pr_metrics.py` to take into account other PR related 
 metrics such as number or length of comments in the PR, or decaying PR lead time for example. The possibilities are 
 numerous, whatever KPI it is you are looking to optimise. 
