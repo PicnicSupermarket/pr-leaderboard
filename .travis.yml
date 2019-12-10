@@ -6,11 +6,11 @@ before_install:
 install:
   - pip3 install --upgrade pip
   - pip3 install --user --upgrade black flake8 isort
-cache: pip
-script:
   - flake8 --max-line-length=88 ./
   - black --check ./
   - isort --check-only *
   - yarn --cwd web install
   - yarn --cwd web build
+cache: pip
+script:
   - docker build . -t pr-game:latest
