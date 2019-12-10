@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM ubuntu:disco
 
 ENV PATH=/usr/lib/go-1.9/bin:$PATH
 
@@ -27,10 +27,13 @@ RUN set -eu pipefail \
     yarn
 
 # Install Python dependencies
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 ADD Pipfile.lock Pipfile config.ini ./
 RUN set -eu pipefail \
   && python3 -m pip install --upgrade pip \
-  && pip install pipenv
+  && python3 -m pip install pipenv \
+  && python3 -m pipenv install --deploy
 
 # Install Javascript dependencies
 ADD web/dist/ ./

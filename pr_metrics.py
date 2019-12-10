@@ -116,7 +116,6 @@ class App:
 
     # Connection to Geth
     ipc = "/root/geth.ipc"
-
     fake = Faker("en_GB")
 
     # Configuration parsing
