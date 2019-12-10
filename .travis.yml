@@ -1,9 +1,9 @@
 language: generic
-python:
-  - '3.7.3'
+python: ["3.7.3"]
 install:
-  - 'pip install pipenv'
-  - 'pipenv sync'
+  - pip install --upgrade pip
+  - pip install --upgrade pipenv
+cache: pip
 script:
   - yarn --cwd web install
   - yarn --cwd web build
