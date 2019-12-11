@@ -14,6 +14,9 @@ web3 = "==5.4.0"
 aiohttp_cors = "==0.7.0"
 Faker = "==3.0.0"
 PyGithub = "==1.44.1"
+isort = "==4.3.21"
+flake8 = "==3.7.9"
+black = "==19.10b0"
 
 [requires]
-python_version = "3.7.3"
+python_version = "3.7"
