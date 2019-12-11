@@ -5,14 +5,14 @@ import math
 import pickle
 import sys
 
-import requests
-
 import aiohttp_cors
+import requests
 from aiohttp import web
 from faker import Faker
 from github import BadCredentialsException, Github, RateLimitExceededException
-from retry import retry
 from web3 import IPCProvider, Web3
+
+from retry import retry
 
 LOGGER = logging.getLogger(__name__)
 
@@ -187,7 +187,7 @@ class App:
 
         yield
         update_scores(app, app["scores"])
-        update_scores(app, app["accounts"])
+        update_accounts(app, app["accounts"])
         LOGGER.info("Flushing of data")
 
 
