@@ -147,6 +147,7 @@ class App:
         app["ipc"] = "/root/geth.ipc"
         # Region for anonymous names
         app["fake"] = Faker("en_GB")
+        yield
 
     async def _init_config_ctx(self, app):
         LOGGER.info("Initialisation of config")
