@@ -5,14 +5,14 @@ import math
 import pickle
 import sys
 
-import aiohttp_cors
 import requests
+
+import aiohttp_cors
 from aiohttp import web
 from faker import Faker
 from github import BadCredentialsException, Github, RateLimitExceededException
-from web3 import IPCProvider, Web3
-
 from retry import retry
+from web3 import IPCProvider, Web3
 
 LOGGER = logging.getLogger(__name__)
 
