@@ -7,10 +7,11 @@ before_install:
 install:
   - pipenv install --dev --deploy
 cache: pip
-script:
+before_script:
   - isort --check-only *
   - flake8 --max-line-length=88 ./
   - black --check ./
+script:
   - yarn --cwd web install
   - yarn --cwd web build
   - docker build . -t pr-game:latest
