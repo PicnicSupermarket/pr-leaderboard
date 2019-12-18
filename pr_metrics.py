@@ -100,7 +100,7 @@ def update_accounts(app, accounts):
 
 
 def update_scores(app, scores):
-    with open(app["score_data_path"], "wb+") as f:
+    with open(app["scores_data_path"], "wb+") as f:
         pickle.dump(scores, f)
 
 
@@ -177,6 +177,7 @@ class App:
         LOGGER.info("Initialisation of GitHub connection")
         # Github API
         github = Github(app["token"])
+        app["github"] = github
         app["org"] = github.get_organization(app["organisation"])
         yield
 
@@ -202,8 +203,13 @@ def main():
     logging.getLogger(__name__).setLevel(logging.DEBUG)
 
     app = App(configparser.ConfigParser()).get_app()
-    app.on_startup.extend([pay_out_loop, score_calculation_loop])
+    app.on_startup.append(startup_tasks)
     web.run_app(app, port=9999)
+
+
+async def startup_tasks(app):
+    asyncio.create_task(score_calculation_loop(app))
+    asyncio.create_task(pay_out_loop(app))
 
 
 async def pay_out_loop(app):
@@ -221,13 +227,12 @@ async def score_calculation_loop(app):
 
 def pay_out(app):
     w3 = Web3(IPCProvider(ipc_path=app["ipc"]))
-    LOGGER.info("Paying out...")
-    accounts = {}
+    LOGGER.info("Paying out developers")
     for user in app["scores"]:
         address = app["accounts"].get(user)
         if address is None:
             address = w3.geth.personal.newAccount(app["default_wallet_password"])
-            accounts[user] = address
+            app["accounts"][user] = address
         ratio = app["scores"].get(user)
         if ratio >= 1.0:
             amount = w3.toHex(int(math.pow(ratio, 15)))
@@ -235,22 +240,19 @@ def pay_out(app):
             w3.eth.sendTransaction(
                 transaction={"from": main, "to": address, "value": amount}
             )
-    app["accounts"] = accounts
-    update_accounts(app, accounts)
+    update_accounts(app, app["accounts"])
 
 
 def calculate_scores(app):
     members = app["org"].get_members()
-    LOGGER.info(f"Pulling stats for {members.totalCount} developers...")
-    scores = app["scores"]
+    LOGGER.info(f"Pulling stats for {members.totalCount} developers")
     for member in members:
         username = str(member.login)
         score = get_score(app, username)
         if score > 0:
             name = member.name if member.name is not None else username
-            scores[name] = score
-            app["scores"] = scores
-            update_scores(app, scores)
+            app["scores"][name] = score
+            update_scores(app, app["scores"])
 
 
 @retry(RateLimitExceededException, delay=10)
