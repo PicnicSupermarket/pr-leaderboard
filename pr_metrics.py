@@ -232,6 +232,7 @@ def pay_out(app):
         address = app["accounts"].get(user)
         if address is None:
             address = w3.geth.personal.newAccount(app["default_wallet_password"])
+            LOGGER.info(f"Created a new account for {user} at {address}")
             app["accounts"][user] = address
         ratio = app["scores"].get(user)
         if ratio >= 1.0:
