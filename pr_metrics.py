@@ -182,8 +182,10 @@ class App:
 
     async def _init_scores_and_accounts_ctx(self, app):
         LOGGER.info("Initialisation of scores and accounts")
-        app["accounts"] = load_data("data/accounts.data")
-        app["scores"] = load_data("data/scores.data")
+        app["accounts_data_path"] = "data/accounts.data"
+        app["scores_data_path"] = "data/scores.data"
+        app["accounts"] = load_data(app["accounts_data_path"])
+        app["scores"] = load_data(app["scores_data_path"])
 
         yield
         update_scores(app, app["scores"])

@@ -8,7 +8,6 @@ install:
   - pipenv install --dev --deploy
 cache: pip
 before_script:
-  - pipenv run isort --check-only *
   - pipenv run flake8 --max-line-length=88 ./
   - pipenv run black --check ./
 script:
