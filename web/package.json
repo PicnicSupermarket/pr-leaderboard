@@ -4,7 +4,6 @@
   "description": "PR ratio leaderboard.",
   "private": true,
   "scripts": {
-    "dev": "NODE_ENV=development webpack-dev-server --inline --progress --config build/webpack.dev.conf.js --port 8081  --host 0.0.0.0 --disableHostCheck true",
     "start": "npm run dev",
     "lint": "eslint --ext .js,.vue src",
     "build": "node build/build.js"
