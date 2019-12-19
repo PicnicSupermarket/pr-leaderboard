@@ -291,7 +291,8 @@
     },
     methods: {
       getAccessToken: function () {
-        const token = document.cookie.split(';').filter(item => item.indexOf('X-Access-Token=') >= 0).map(cookie => cookie.substring('X-Access-Token='.length));
+        const accessToken = 'X-Access-Token=';
+        const token = document.cookie.split(';').filter(item => item.includes(accessToken)).map(cookie => cookie.substring(accessToken.length));
         return token[0];
       },
       getRatios: function () {
@@ -304,13 +305,12 @@
         axios
           .get('http://localhost:9999/api/metrics', { headers })
           .then(response => {
-            this.loading = false;
             this.items = response.data.map((item, index) => {
               item['rank'] = index + 1;
               return item;
             });
           })
-          .catch(() => {
+          .finally(() => {
             this.loading = false;
           });
       },
