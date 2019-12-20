@@ -27,7 +27,6 @@ class Auth(web.View):
                 "client_secret": self.request.app["github_client_secret"],
                 "code": code,
             },
-            headers={"Accept": "application/json"},
         )
         access_token = response.json()["access_token"]
         r = web.HTTPFound(self.request.app["github_return_url"])
